@@ -1,0 +1,81 @@
+version: '3'
+
+x-airflow-common-extended:
+  &airflow-common-extended
+
+  # Issue:
+  # - build cannot overwrite 'image' attribute and has higher priority
+  # Workaround:
+  # - Please comment the 'image' attribute in ./deployment/airflow/docker-compose.yaml
+  build: ./deployment/airflow/
+  environment:
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+
+services:
+  postgres:
+    extends:
+      file: ./deployment/airflow/docker-compose.yaml
+      service: postgres
+  redis:
+    extends:
+      file: ./deployment/airflow/docker-compose.yaml
+      service: redis
+  airflow-webserver:
+    extends:
+      file: ./deployment/airflow/docker-compose.yaml
+      service: airflow-webserver
+    <<: *airflow-common-extended
+  airflow-scheduler:
+    extends:
+      file: ./deployment/airflow/docker-compose.yaml
+      service: airflow-scheduler
+    <<: *airflow-common-extended
+  airflow-worker:
+    extends:
+      file: ./deployment/airflow/docker-compose.yaml
+      service: airflow-worker
+    <<: *airflow-common-extended
+  airflow-triggerer:
+    extends:
+      file: ./deployment/airflow/docker-compose.yaml
+      service: airflow-triggerer
+    <<: *airflow-common-extended
+  airflow-init:
+    extends:
+      file: ./deployment/airflow/docker-compose.yaml
+      service: airflow-init
+    <<: *airflow-common-extended
+  airflow-cli:
+    extends:
+      file: ./deployment/airflow/docker-compose.yaml
+      service: airflow-cli
+    <<: *airflow-common-extended
+
+  grafana:
+    image: grafana/grafana
+    ports:
+    - 3000:3000
+  
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MYSQL_DATABASE: airflow_demo_covid19
+      MYSQL_ROOT_PASSWORD: airflow
+      MYSQL_USER: airflow
+      MYSQL_PASSWORD: airflow
+    volumes:
+      - ./deployment/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - mariadb-db-volume:/var/lib/mysql
+    command: mariadbd --sql_mode=ANSI_QUOTES
+    ports:
+      - 3306:3306
+
+volumes:
+  postgres-db-volume:
+    driver: local
+  mariadb-db-volume:
+    driver: local
