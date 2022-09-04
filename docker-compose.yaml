@@ -9,11 +9,12 @@ x-airflow-common-extended:
   # - Please comment the 'image' attribute in ./deployment/airflow/docker-compose.yaml
   build: ./deployment/airflow/
   environment:
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    - AIRFLOW__CORE__LOAD_EXAMPLES=false
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
+    - ./data:/opt/data/
 
 services:
   postgres:
@@ -38,6 +39,8 @@ services:
     extends:
       file: ./deployment/airflow/docker-compose.yaml
       service: airflow-worker
+    ports:
+      - 4040:4040
     <<: *airflow-common-extended
   airflow-triggerer:
     extends:
@@ -57,25 +60,71 @@ services:
 
   grafana:
     image: grafana/grafana
+    environment:
+      - AIRFLOW_DEMO_MARIADB_PASSWORD=airflow
+      - GF_INSTALL_PLUGINS=grafana-worldmap-panel
+    volumes:
+      - ./deployment/grafana/provisioning:/etc/grafana/provisioning
+      - ./deployment/grafana/grafana.ini:/etc/grafana/grafana.ini
     ports:
     - 3000:3000
   
   mariadb:
     image: mariadb:latest
     environment:
-      MYSQL_DATABASE: airflow_demo_covid19
-      MYSQL_ROOT_PASSWORD: airflow
-      MYSQL_USER: airflow
-      MYSQL_PASSWORD: airflow
+      - MYSQL_DATABASE=airflow_demo_covid19
+      - MYSQL_ROOT_PASSWORD=airflow
+      - MYSQL_USER=airflow
+      - MYSQL_PASSWORD=airflow
     volumes:
       - ./deployment/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - mariadb-db-volume:/var/lib/mysql
     command: mariadbd --sql_mode=ANSI_QUOTES
     ports:
       - 3306:3306
+  
+  spark:
+    image: docker.io/bitnami/spark:latest
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_MASTER_WEBUI_PORT=8088
+      - SPARK_MASTER_HOST=spark
+      - SPARK_WORKER_CORES=2
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8088"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    ports:
+      - 8088:8088
+    volumes:
+      - ./data:/opt/data/:rw
+
+  spark-worker:
+    image: docker.io/bitnami/spark:latest
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark:7077
+      - SPARK_WORKER_MEMORY=4G
+      - SPARK_EXECUTOR_MEMORY=4G
+      - SPARK_WORKER_CORES=2
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    volumes:
+      - ./data:/opt/data/:rw
+    depends_on:
+      spark:
+        condition: service_healthy
 
 volumes:
   postgres-db-volume:
     driver: local
   mariadb-db-volume:
     driver: local
+  

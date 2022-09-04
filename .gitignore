@@ -135,3 +135,6 @@ plugins/
 # notebooks output
 notebooks/daily/
 notebooks/source/
+
+.DS_Store
+data/

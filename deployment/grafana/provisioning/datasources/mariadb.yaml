@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+- name: airflow-demo-covid19-mariadb
+  type: mysql
+  url: mariadb:3306
+  database: airflow_demo_covid19
+  user: airflow
+  secureJsonData:
+    password: ${AIRFLOW_DEMO_MARIADB_PASSWORD}
