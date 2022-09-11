@@ -82,6 +82,7 @@ services:
     volumes:
       - ./deployment/grafana/provisioning:/etc/grafana/provisioning
       - ./deployment/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./deployment/grafana/resource/dashboards/:/var/lib/grafana/dashboards/
     ports:
     - 3000:3000
   

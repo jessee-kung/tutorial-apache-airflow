@@ -1,0 +1,699 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "target": {
+            "limit": 100,
+            "matchAny": false,
+            "tags": [],
+            "type": "dashboard"
+          },
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 1,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 9,
+        "panels": [],
+        "title": "Region Overview",
+        "type": "row"
+      },
+      {
+        "circleMaxSize": 30,
+        "circleMinSize": 2,
+        "colors": [
+          "#73BF69",
+          "#FADE2A",
+          "#FF9830",
+          "#F2495C",
+          "#C4162A"
+        ],
+        "datasource": {
+          "type": "mysql",
+          "uid": "airflow_demo_covid19_mariadb"
+        },
+        "decimals": 0,
+        "esMetric": "Count",
+        "gridPos": {
+          "h": 8,
+          "w": 16,
+          "x": 0,
+          "y": 1
+        },
+        "hideEmpty": false,
+        "hideZero": true,
+        "id": 4,
+        "initialZoom": 1,
+        "locationData": "table",
+        "mapCenter": "(0°, 0°)",
+        "mapCenterLatitude": 0,
+        "mapCenterLongitude": 0,
+        "maxDataPoints": 1,
+        "mouseWheelZoom": false,
+        "showLegend": true,
+        "stickyLabels": false,
+        "tableQueryOptions": {
+          "geohashField": "geohash",
+          "labelField": "region",
+          "latitudeField": "latitude",
+          "longitudeField": "longitude",
+          "metricField": "metric",
+          "queryType": "coordinates"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "mysql",
+              "uid": "airflow_demo_covid19_mariadb"
+            },
+            "format": "table",
+            "group": [
+              {
+                "params": [
+                  "region"
+                ],
+                "type": "column"
+              }
+            ],
+            "metricColumn": "confirmed",
+            "rawQuery": true,
+            "rawSql": "SELECT\n  updated AS \"time\",\n  SUM(confirmed) AS metric,\n  latitude,\n  longitude,\n  region\nFROM regional_based\nWHERE\n  $__timeFilter(updated)\nGROUP BY region, latitude, longitude\nORDER BY updated",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "latitude"
+                  ],
+                  "type": "column"
+                },
+                {
+                  "params": [
+                    "avg"
+                  ],
+                  "type": "aggregate"
+                },
+                {
+                  "params": [
+                    "latitude"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "longitude"
+                  ],
+                  "type": "column"
+                },
+                {
+                  "params": [
+                    "avg"
+                  ],
+                  "type": "aggregate"
+                },
+                {
+                  "params": [
+                    "longitude"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "region"
+                  ],
+                  "type": "column"
+                },
+                {
+                  "params": [
+                    "avg"
+                  ],
+                  "type": "aggregate"
+                },
+                {
+                  "params": [
+                    "region"
+                  ],
+                  "type": "alias"
+                }
+              ]
+            ],
+            "table": "regional_based",
+            "timeColumn": "updated",
+            "timeColumnType": "date",
+            "where": [
+              {
+                "datatype": "date",
+                "name": "",
+                "params": [
+                  "updated",
+                  "IN",
+                  "(SELECT MAX(updated) FROM regional_based)"
+                ],
+                "type": "expression"
+              }
+            ]
+          }
+        ],
+        "thresholds": "100,1000,5000,10000",
+        "title": "Confirmed Case",
+        "type": "grafana-worldmap-panel",
+        "unitPlural": "",
+        "unitSingle": "",
+        "valueName": "total"
+      },
+      {
+        "datasource": {
+          "type": "mysql",
+          "uid": "airflow_demo_covid19_mariadb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto",
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "percentage",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "#6ED0E0",
+                  "value": 30
+                },
+                {
+                  "color": "#EAB839",
+                  "value": 50
+                },
+                {
+                  "color": "#EF843C",
+                  "value": 70
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 1
+        },
+        "id": 6,
+        "options": {
+          "footer": {
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "pluginVersion": "9.1.1",
+        "targets": [
+          {
+            "datasource": {
+              "type": "mysql",
+              "uid": "airflow_demo_covid19_mariadb"
+            },
+            "format": "table",
+            "group": [],
+            "metricColumn": "confirmed",
+            "rawQuery": true,
+            "rawSql": "SELECT\n  region,\n  SUM(confirmed) AS metric\nFROM regional_based\nWHERE\n  $__timeFilter(updated)\nGROUP BY region\nORDER BY metric DESC\nLIMIT 0,10",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "region"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "table": "regional_based",
+            "timeColumn": "updated",
+            "timeColumnType": "date",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Confirmed Case - Top 10 Region",
+        "type": "table"
+      },
+      {
+        "circleMaxSize": 30,
+        "circleMinSize": 2,
+        "colors": [
+          "#73BF69",
+          "#FADE2A",
+          "#FF9830",
+          "#F2495C",
+          "#C4162A"
+        ],
+        "datasource": {
+          "type": "mysql",
+          "uid": "airflow_demo_covid19_mariadb"
+        },
+        "decimals": 0,
+        "esMetric": "Count",
+        "gridPos": {
+          "h": 8,
+          "w": 16,
+          "x": 0,
+          "y": 9
+        },
+        "hideEmpty": false,
+        "hideZero": true,
+        "id": 2,
+        "initialZoom": 1,
+        "locationData": "table",
+        "mapCenter": "(0°, 0°)",
+        "mapCenterLatitude": 0,
+        "mapCenterLongitude": 0,
+        "maxDataPoints": 1,
+        "mouseWheelZoom": false,
+        "showLegend": true,
+        "stickyLabels": false,
+        "tableQueryOptions": {
+          "geohashField": "geohash",
+          "labelField": "region",
+          "latitudeField": "latitude",
+          "longitudeField": "longitude",
+          "metricField": "metric",
+          "queryType": "coordinates"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "mysql",
+              "uid": "airflow_demo_covid19_mariadb"
+            },
+            "format": "table",
+            "group": [],
+            "metricColumn": "death",
+            "rawQuery": true,
+            "rawSql": "SELECT\n  updated AS \"time\",\n  SUM(death) AS metric,\n  latitude,\n  longitude,\n  region\nFROM regional_based\nWHERE\n  $__timeFilter(updated)\nGROUP BY region, latitude, longitude\nORDER BY updated",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "latitude"
+                  ],
+                  "type": "column"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "longitude"
+                  ],
+                  "type": "column"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "region"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "table": "regional_based",
+            "timeColumn": "updated",
+            "timeColumnType": "date",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "thresholds": "10,100,500,1000",
+        "title": "Death Case",
+        "type": "grafana-worldmap-panel",
+        "unitPlural": "",
+        "unitSingle": "",
+        "valueName": "total"
+      },
+      {
+        "datasource": {
+          "type": "mysql",
+          "uid": "airflow_demo_covid19_mariadb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto",
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "percentage",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "#6ED0E0",
+                  "value": 30
+                },
+                {
+                  "color": "#EAB839",
+                  "value": 50
+                },
+                {
+                  "color": "#EF843C",
+                  "value": 70
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 9
+        },
+        "id": 7,
+        "options": {
+          "footer": {
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "pluginVersion": "9.1.1",
+        "targets": [
+          {
+            "datasource": {
+              "type": "mysql",
+              "uid": "airflow_demo_covid19_mariadb"
+            },
+            "format": "table",
+            "group": [],
+            "metricColumn": "confirmed",
+            "rawQuery": true,
+            "rawSql": "SELECT\n  region,\n  SUM(death) AS metric\nFROM regional_based\nWHERE\n  $__timeFilter(updated)\nGROUP BY region\nORDER BY metric DESC\nLIMIT 0,10",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "region"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "table": "regional_based",
+            "timeColumn": "updated",
+            "timeColumnType": "date",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Death Case Today - Top 10 Region",
+        "type": "table"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 17
+        },
+        "id": 11,
+        "panels": [],
+        "title": "Trends of Selected Country",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "mysql",
+          "uid": "airflow_demo_covid19_mariadb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineStyle": {
+                "fill": "solid"
+              },
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 18
+        },
+        "id": 13,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "mysql",
+              "uid": "airflow_demo_covid19_mariadb"
+            },
+            "format": "table",
+            "group": [],
+            "metricColumn": "confirmed",
+            "rawQuery": true,
+            "rawSql": "SELECT\n  updated AS \"time\",\n  confirmed AS metric\nFROM country_based\nWHERE\n  $__timeFilter(updated) AND\n  country = '$country'\nORDER BY updated",
+            "refId": "Confirmed Case",
+            "select": [
+              [
+                {
+                  "params": [
+                    "confirmed"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "table": "country_based",
+            "timeColumn": "updated",
+            "timeColumnType": "date",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              },
+              {
+                "datatype": "varchar",
+                "name": "",
+                "params": [
+                  "country",
+                  "=",
+                  "'$country'"
+                ],
+                "type": "expression"
+              }
+            ]
+          },
+          {
+            "datasource": {
+              "type": "mysql",
+              "uid": "airflow_demo_covid19_mariadb"
+            },
+            "format": "table",
+            "group": [],
+            "hide": false,
+            "metricColumn": "none",
+            "rawQuery": true,
+            "rawSql": "SELECT\n  updated AS \"time\",\n  death AS metric\nFROM country_based\nWHERE\n  $__timeFilter(updated) AND\n  country = '$country'\nORDER BY updated",
+            "refId": "Death Cases",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "timeColumn": "time",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Cases Trending",
+        "type": "timeseries"
+      }
+    ],
+    "schemaVersion": 37,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": true,
+            "text": "Japan",
+            "value": "Japan"
+          },
+          "datasource": {
+            "type": "mysql",
+            "uid": "airflow_demo_covid19_mariadb"
+          },
+          "definition": "SELECT country FROM country_based GROUP BY country ORDER BY country ASC;",
+          "hide": 0,
+          "includeAll": false,
+          "multi": false,
+          "name": "country",
+          "options": [],
+          "query": "SELECT country FROM country_based GROUP BY country ORDER BY country ASC;",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Airflow Demo - Covid 19 Dashboard",
+    "uid": "Rkc7RUWVz",
+    "version": 2,
+    "weekStart": ""
+  }
