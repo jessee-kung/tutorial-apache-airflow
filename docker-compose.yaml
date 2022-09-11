@@ -10,11 +10,27 @@ x-airflow-common-extended:
   build: ./deployment/airflow/
   environment:
     - AIRFLOW__CORE__LOAD_EXAMPLES=false
+
+    # Add spark default connection
+    # Notice: not shown on UI, see note on: https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#uri-format-example
+    - AIRFLOW_CONN_SPARK_DEFAULT=spark://spark:7077/?queue=root.default&deploy_mode=cluster&spark_home=&spark_binary=spark-submit&namespace=default
+
+    # Add airflow variables for database credential
+    # Notice: not shown on UI, see note on: https://airflow.apache.org/docs/apache-airflow/stable/howto/variable.html#storing-variables-in-environment-variables
+    - AIRFLOW_VAR_MARIADB_HOST=mariadb
+    - AIRFLOW_VAR_MARIADB_PORT=3306
+    - AIRFLOW_VAR_MARIADB_NAME=airflow_demo_covid19
+    - AIRFLOW_VAR_MARIADB_USER=airflow
+    - AIRFLOW_VAR_MARIADB_PASSWD=airflow
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
     - ./data:/opt/data/
+    - type: bind
+      source: ./deployment/spark/jars/mariadb-java-client-3.0.7.jar
+      target: /home/airflow/.local/lib/python3.7/site-packages/pyspark/jars/mariadb-java-client-3.0.7.jar
+  restart: "no"
 
 services:
   postgres:
@@ -93,34 +109,43 @@ services:
       - SPARK_SSL_ENABLED=no
       - SPARK_MASTER_WEBUI_PORT=8088
       - SPARK_MASTER_HOST=spark
-      - SPARK_WORKER_CORES=2
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8088"]
-      interval: 5s
+      interval: 3s
       timeout: 3s
-      retries: 3
+      retries: 20
     ports:
       - 8088:8088
     volumes:
       - ./data:/opt/data/:rw
+      - type: bind
+        source: ./deployment/spark/jars/mariadb-java-client-3.0.7.jar
+        target: /opt/bitnami/spark/jars/mariadb-java-client-3.0.7.jar
 
   spark-worker:
     image: docker.io/bitnami/spark:latest
+    mem_reservation: 2g
+    cpus: 1
+    scale: 4
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark:7077
-      - SPARK_WORKER_MEMORY=4G
-      - SPARK_EXECUTOR_MEMORY=4G
-      - SPARK_WORKER_CORES=2
+      - SPARK_EXECUTOR_MEMORY=2G
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_CORES=1
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
       - SPARK_RPC_ENCRYPTION_ENABLED=no
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
     volumes:
       - ./data:/opt/data/:rw
+      - type: bind
+        source: ./deployment/spark/jars/mariadb-java-client-3.0.7.jar
+        target: /opt/bitnami/spark/jars/mariadb-java-client-3.0.7.jar
     depends_on:
       spark:
         condition: service_healthy
+    
 
 volumes:
   postgres-db-volume:

@@ -12,3 +12,4 @@ USER airflow
 RUN pip install --no-cache-dir apache-airflow-providers-apache-spark && \
     echo export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac)))) >> /home/airflow/.bashrc && \
     echo export SPARK_HOME=/home/airflow/.local/lib/python3.7/site-packages/pyspark >> /home/airflow/.bashrc
+RUN pip install mysql-connector-python==8.0.29
