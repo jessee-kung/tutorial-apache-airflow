@@ -37,10 +37,12 @@ services:
     extends:
       file: ./deployment/airflow/docker-compose.yaml
       service: postgres
+    restart: "no"
   redis:
     extends:
       file: ./deployment/airflow/docker-compose.yaml
       service: redis
+    restart: "no"
   airflow-webserver:
     extends:
       file: ./deployment/airflow/docker-compose.yaml
