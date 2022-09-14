@@ -21,3 +21,18 @@ Most of services with Web UI interfaces have set the port forwarding as below:
 | Grafana | http://localhost:4040 | admin / admin |
 | Spark | http://localhost:8088 | |
 | Spark (Application UI) | http://localhost:4040 |
+
+## Development
+The `dags` folder are directly mounted as Airflow DAGs root folder. You can develop your DAGs under it.
+
+Dependencies:
+- Python 3.7+
+- PySpark
+- Airflow
+- Airflow Apache Spark Provider
+- MySQL Connector 8.0.29 / Python
+
+Once can install the dependencies as below:
+```
+$ pip install -r requirements.txt
+```

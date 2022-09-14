@@ -1,3 +1,5 @@
 airflow
 pyspark
 apache-airflow-providers-apache-spark
+pandas
+mysql-connector-python==8.0.29
