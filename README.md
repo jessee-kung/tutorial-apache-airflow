@@ -5,6 +5,12 @@ Apache airflow tutorial for beginners. The tutorial sample code is delivered as 
     - Dependency of Grafana
 - Apache Spark Clusters
     - By default: 1 master + 4 worker nodes
+
+It provides 2 examples:
+| Example | Description
+| ---- | ---- |
+| Bash Operator | Bash operator provided by Apache Airflow officially |
+| Covid 19 ETL | A demo which use [Bing COVID-19 Dataset](https://docs.microsoft.com/azure/open-datasets/dataset-bing-covid-19) |
 ## Getting Started
 Please have the Docker community installed first
 1. Clone the repository
